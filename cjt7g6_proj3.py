@@ -71,12 +71,14 @@ def updateWeights(weights, learningRate, vT):
 def trainWeights(df, weights, numIterations, learningRate):
     i = 1
 
+    '''This loop will continue to train the weights until it maxes out the number of iterations'''
     while (i < numIterations):
-        g_t = computeGradientAverage(df, weights)
-        v_t = g_t * -1
-        weights = updateWeights(weights, learningRate, v_t)
+        g_t = computeGradientAverage(df, weights) #compute the gradient
+        v_t = g_t * -1 #set the direction to move
+        weights = updateWeights(weights, learningRate, v_t) #update the weights
+        i += 1 #increment the counter
 
-
+    return weights
 
 '''this is the decision boundary'''
 def decisionBoundary(probability):
@@ -93,6 +95,7 @@ def main():
     weights = [0, 0.05]
     df = createTrainingData()
     plotVals(df)
-
+    weights = trainWeights(df, weights, numIterations=1000, learningRate=0.001)
+    print(weights)
 
 main()
