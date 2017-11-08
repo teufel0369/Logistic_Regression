@@ -16,29 +16,6 @@ def createTrainingData():
 
     return df
 
-'''plot the values of the columns'''
-def plotVals(df):
-    x = df['X'].values
-    y = df['Y'].values
-
-    '''create a plot and two subplots for -1 and 1'''
-    fig = plt.figure()
-    ax1 = fig.add_subplot(111)
-    ax2 = fig.add_subplot(111)
-
-    '''iterate over the x,y values and tag and plot them appropriately'''
-    for index in range(len(x)):
-        if y[index] == 0:
-            ax1.scatter(x[index], y[index], alpha=0.7, c='red', edgecolors='none', s=50, label='red')
-        else:
-            ax2.scatter(x[index], y[index], alpha=0.7, c='black', edgecolors='none', s=50, label='black')
-
-    plt.title("Logistic Regression: Probability of Failure")
-    plt.xlabel("Weeks of laziness")
-    plt.ylabel("Pass / Fail")
-    plt.show()
-
-
 '''This function will calculate the gradient average'''
 def computeGradientAverage(df, weights):
     x = df['X'].values
@@ -48,9 +25,9 @@ def computeGradientAverage(df, weights):
 
     for i in range(len(x)):
         top = y[i] * x[i] # Yn * Xn
-        wTx = weights[0] + weights[1] * x[i] # ****NOTE: still slightly unsure about this
+        wTx = weights[0]*1 + weights[1] * x[i] # compute the dot product of
         y_wTx = y[i] * wTx # Yn * wTx
-        bottom = 1 + math.pow(math.e, y_wTx) # 1 + e^y_n * wTx
+        bottom = 1 + math.exp(y_wTx) # 1 + e^y_n * wTx
         result = top / bottom #divide the result
         summation += result #add it to the sum
 
@@ -76,6 +53,9 @@ def trainWeights(df, weights, numIterations, learningRate):
         g_t = computeGradientAverage(df, weights) #compute the gradient
         v_t = g_t * -1 #set the direction to move
         weights = updateWeights(weights, learningRate, v_t) #update the weights
+        print("Weights for iteration: " + str(i))
+        print(weights)
+        print("")
         i += 1 #increment the counter
 
     return weights
@@ -84,18 +64,19 @@ def trainWeights(df, weights, numIterations, learningRate):
 def decisionBoundary(probability):
     return 1 if probability >= .5 else 0
 
-'''Just to have fun and make predictions once the weights are trained'''
+'''Just to make predictions once the weights are trained'''
 def probabilityOutputFunction(trainedWeights, xNum):
     prediction = trainedWeights[0] + trainedWeights[1]*xNum
     prediction *= -1
-    return 1 / 1 + math.pow(math.e, prediction)
+    return 1 / 1 + math.exp(prediction)
+
 
 
 def main():
     weights = [0, 0.05]
     df = createTrainingData()
-    plotVals(df)
-    weights = trainWeights(df, weights, numIterations=1000, learningRate=0.001)
-    print(weights)
+    weights = trainWeights(df, weights, numIterations=1000, learningRate=0.01)
+    string = "\nSigmoid: " + str(1) + " / " + str(1) + " + e ^ " + str(weights[0]) + " + " + str(weights[1]) + "x"
+    print(string)
 
 main()
