@@ -4,6 +4,7 @@ import pandas as pd
 import random
 import os
 import math
+import decimal
 
 '''create the training data set'''
 def createTrainingData():
@@ -16,23 +17,44 @@ def createTrainingData():
 
     return df
 
+'''This function will create the training data for question c'''
+def createTrainingData2():
+    x = [1, 2, 3, 4, 5, 6, 7, 8, 3, 5]  # create the x-values
+    y = [0, 1, 0, 1, 0, 1, 1, 1, 1, 1]  # create the y-values
+
+    df = pd.DataFrame()  # create an empty dataframe to append the lists to
+    df['X'] = x  # insert the list of x-values into the dataframe
+    df['Y'] = y  # insert the list of y-values into the dataframe
+
+    return df
+
+
+'''This function will calculate wTx'''
+def wTxEquation(df, weights):
+    x = df['X'].values
+    wTx = weights[0] + weights[1]*1
+
+    for i in range(len(x)):
+        wTx += weights[1] * x[i]
+
+    return wTx
+
 '''This function will calculate the gradient average'''
 def computeGradientAverage(df, weights):
     x = df['X'].values
     y = df['Y'].values
     N = len(x)
     summation = 0
+    wTx = wTxEquation(df, weights)
 
     for i in range(len(x)):
         top = y[i] * x[i] # Yn * Xn
-        wTx = weights[0]*1 + weights[1] * x[i] # compute the dot product of
         y_wTx = y[i] * wTx # Yn * wTx
-        bottom = 1 + math.exp(y_wTx) # 1 + e^y_n * wTx
+        bottom = 1 + (math.exp(y_wTx)) # 1 + e^y_n * wTx
         result = top / bottom #divide the result
         summation += result #add it to the sum
 
-    g_t = summation / N #compute the average
-    g_t *= -1 #multiply it by -1 per the algorithm on page 95
+    g_t = (-1*summation) / N #compute the average
 
     return g_t
 
@@ -45,6 +67,7 @@ def updateWeights(weights, learningRate, vT):
 
     return weights
 
+'''this function will train the weights'''
 def trainWeights(df, weights, numIterations, learningRate):
     i = 1
 
@@ -65,18 +88,36 @@ def decisionBoundary(probability):
     return 1 if probability >= .5 else 0
 
 '''Just to make predictions once the weights are trained'''
-def probabilityOutputFunction(trainedWeights, xNum):
-    prediction = trainedWeights[0] + trainedWeights[1]*xNum
-    prediction *= -1
-    return 1 / 1 + math.exp(prediction)
-
+def sigmoid(trainedWeights, xNum):
+    prediction = -1 * (trainedWeights[0] + trainedWeights[1]*xNum)
+    top = 1
+    bottom = 1 + math.exp(prediction)
+    return top / bottom
 
 
 def main():
-    weights = [0, 0.05]
-    df = createTrainingData()
-    weights = trainWeights(df, weights, numIterations=1000, learningRate=0.01)
-    string = "\nSigmoid: " + str(1) + " / " + str(1) + " + e ^ " + str(weights[0]) + " + " + str(weights[1]) + "x"
-    print(string)
+    weights = [random.uniform(0.001, 0.1), random.uniform(0.001, 0.1)] #initialize the weights to some random small values
+    df = createTrainingData() #create the training data
+    weights = trainWeights(df, weights, numIterations=1000, learningRate=0.05) #train the weights
+    string = "\nSigmoid: " + str(1) + " / " + str(1) + " + e ^ -(" + str(weights[0]) + " + " + str(weights[1]) + "x)"
+    print(string) #print out the equation of a line
+    threeWeeksNoStudy = sigmoid(weights, 3) * 100
+    fiveWeeksNoStudy = sigmoid(weights, 5) * 100
+    threeWeekString = "\nThe probability of passing with 3 weeks of no study: " + str(threeWeeksNoStudy) + "%"
+    fiveWeekString = "\nThe probability of passing with 5 weeks of no study: " + str(fiveWeeksNoStudy) + "%"
+    print(threeWeekString)
+    print(fiveWeekString)
+
+    weights2 = [random.uniform(0.001, 0.1), random.uniform(0.001, 0.1)]  # initialize the weights to some random small values
+    df2 = createTrainingData()  # create the training data
+    weights2 = trainWeights(df2, weights2, numIterations=1000, learningRate=0.05)  # train the weights
+    string = "\nSigmoid: " + str(1) + " / " + str(1) + " + e ^ -(" + str(weights2[0]) + " + " + str(weights2[1]) + "x)"
+    print(string)  # print out the equation of a line
+    threeWeeksNoStudy = sigmoid(weights2, 3) * 100
+    fiveWeeksNoStudy = sigmoid(weights2, 5) * 100
+    threeWeekString = "\nThe probability of passing with 3 weeks of no study: " + str(threeWeeksNoStudy) + "%"
+    fiveWeekString = "\nThe probability of passing with 5 weeks of no study: " + str(fiveWeeksNoStudy) + "%"
+    print(threeWeekString)
+    print(fiveWeekString)
 
 main()
